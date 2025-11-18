@@ -2,9 +2,7 @@ import dlt
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
-# ---------------------------------------------------------
-# ---------------------- BRONZE ---------------------------
-# ---------------------------------------------------------
+# BRONZE 
 
 @dlt.table(
     table_properties={"quality": "bronze"},
@@ -27,9 +25,7 @@ def bank_bronze():
     return df
 
 
-# ---------------------------------------------------------
-# ---------------------- SILVER ---------------------------
-# ---------------------------------------------------------
+# SILVER
 
 @dlt.table(
     name="bank_silver",
@@ -46,21 +42,16 @@ def bank_silver_table():
     )
 
 
-# ---------------------------------------------------------
-# --------------------- SCD TYPE-1 ------------------------
-# ---------------------------------------------------------
+# SCD TYPE-1 
 
-# Create streaming table for SCD1
+#  streaming table for SCD1
 dlt.create_streaming_table("Bank_SCD1")
 
-# View on the silver table (STREAMING)
 @dlt.view(name="bank_silver_vw")
 def bank_silver_vw():
-    # FIXED: Using dlt.read_stream instead of UC table path
     return dlt.read_stream("bank_silver")
 
 
-# Apply SCD1 merge logic
 dlt.apply_changes(
     target="Bank_SCD1",
     source="bank_silver_vw",
@@ -69,10 +60,7 @@ dlt.apply_changes(
     sequence_by=col("ID")
 )
 
-
-# ---------------------------------------------------------
-# ------------------------ GOLD ---------------------------
-# ---------------------------------------------------------
+#  GOLD 
 
 @dlt.table(
     name="bank_gold_income_by_age",
@@ -109,10 +97,7 @@ def bank_gold_creditcards_per_family():
         .orderBy("Family")
     )
 
-
-# ---------------------------------------------------------
-# ------------------- DIMENTIONAL TABLES ------------------
-# ---------------------------------------------------------
+#  DIMENTIONAL TABLES 
 
 # DIM CUSTOMER
 @dlt.table(
@@ -154,10 +139,8 @@ def dim_account():
         .dropDuplicates(["customer_key"])
     )
 
+#  FACT TABLE ------------------------
 
-# ---------------------------------------------------------
-# --------------------- FACT TABLE ------------------------
-# ---------------------------------------------------------
 
 @dlt.table(
     name="fact_loan",
@@ -177,9 +160,8 @@ def fact_loan():
     )
 
 
-# ---------------------------------------------------------
-# ------------------- STAR SCHEMA -------------------------
-# ---------------------------------------------------------
+
+#  STAR SCHEMA 
 
 @dlt.table(
     name="loan_star_schema",
