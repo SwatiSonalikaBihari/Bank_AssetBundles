@@ -1,21 +1,57 @@
-# bank_demo_pipeline
+Bank Loan Modelling – Delta Live Tables Pipeline (DLT)
 
-This folder defines all source code for the 'bank_demo_pipeline' pipeline:
+This project implements an end-to-end Medallion Architecture using Databricks Delta Live Tables (DLT).
+It ingests raw CSV data, performs structured transformations across Bronze → Silver → Gold layers, applies SCD Type-1, builds dimensional and fact tables, and finally produces a Star Schema for analytical consumption.
 
-- `explorations`: Ad-hoc notebooks used to explore the data processed by this pipeline.
-- `transformations`: All dataset definitions and transformations.
-- `utilities`: Utility functions and Python modules used in this pipeline.
+          ┌──────────┐
+         │   CSV     │
+         └─────┬────┘
+               │
+               ▼
+        ┌────────────┐
+        │  BRONZE     │
+        └─────┬──────┘
+               │
+               ▼
+        ┌────────────┐
+        │  SILVER     │
+        └─────┬──────┘
+               │ STREAM
+               ▼
+        ┌────────────┐
+        │ SCD TYPE 1  │
+        └─────┬──────┘
+               │
+               ▼
+        ┌───────────────────────────────┐
+        │              GOLD              │
+        │                                 │
+        │    ┌────────┐   ┌────────┐     │
+        │    │ DIM 1  │   │ DIM 2  │     │
+        │    └────┬───┘   └───┬────┘     │
+        │         │           │           │
+        │         ▼           ▼           │
+        │        ┌──────── FACT ────────┐ │
+        │        │                      │ │
+        │        └──────────┬───────────┘ │
+        │                   │             │
+        │                   ▼             │
+        │            ┌────────────┐       │
+        │            │   STAR     │       │
+        │            │  SCHEMA    │       │
+        │            └────────────┘       │
+        └─────────────────────────────────┘
+        Key Features :-
+        1.Implemented using Delta Live Tables (DLT)
+        2.Streaming pipeline from Silver → SCD1
+        3.SCD Type-1 using dlt.apply_changes()
+        4.Bronze → Silver → Gold Medallion Architecture
+        5.Star Schema with:
+           fact_loan
 
-## Getting Started
+           dim_customer
 
-To get started, go to the `transformations` folder -- most of the relevant source code lives there:
+           dim_account
 
-* By convention, every dataset under `transformations` is in a separate file.
-* Take a look at the sample under "sample_users_bank_demo_pipeline.py" to get familiar with the syntax.
-  Read more about the syntax at https://docs.databricks.com/dlt/python-ref.html.
-* Use `Run file` to run and preview a single transformation.
-* Use `Run pipeline` to run _all_ transformations in the entire pipeline.
-* Use `+ Add` in the file browser to add a new data set definition.
-* Use `Schedule` to run the pipeline on a schedule!
-
-For more tutorials and reference material, see https://docs.databricks.com/dlt.
+           loan_star_schema
+         6.Data Quality constraints using EXPECT_OR_DROP
